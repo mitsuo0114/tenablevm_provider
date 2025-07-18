@@ -1,0 +1,15 @@
+repos:
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+      - id: go-mod-tidy
+      - id: golangci-lint
+  - repo: local
+    hooks:
+      - id: go-test-coverage
+        name: go test with coverage
+        entry: go test -coverprofile=coverage.out ./...
+        language: system
+        pass_filenames: false

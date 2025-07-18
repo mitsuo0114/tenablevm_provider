@@ -1,4 +1,4 @@
-name: Go Tests
+name: Go CI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,9 +16,13 @@ jobs:
       with:
         go-version-file: go.mod
         cache: true
-    - name: Check go fmt
-      run: |
-        go fmt ./...
-        git diff --exit-code
-    - name: Run tests
-      run: go test ./...
+    - name: Install pre-commit
+      run: pip install pre-commit
+    - name: Run pre-commit checks
+      run: pre-commit run --show-diff-on-failure --color=always --all-files
+    - name: Run go tests with coverage
+      run: go test -coverprofile=coverage.out ./...
+    - uses: actions/upload-artifact@v4
+      with:
+        name: coverage
+        path: coverage.out
