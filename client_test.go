@@ -4,16 +4,38 @@ import (
     "encoding/json"
     "net/http"
     "net/http/httptest"
+    "net/url"
     "reflect"
     "testing"
 )
+
+type rewriteTransport struct {
+    base *url.URL
+    rt   http.RoundTripper
+}
+
+func (r rewriteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+    u := *req.URL
+    u.Scheme = r.base.Scheme
+    u.Host = r.base.Host
+    req.URL = &u
+    return r.rt.RoundTrip(req)
+}
+
+func newTestClient(ts *httptest.Server) *Client {
+    base, _ := url.Parse(ts.URL)
+    return &Client{
+        AccessKey: "access",
+        SecretKey: "secret",
+        Http: &http.Client{Transport: rewriteTransport{base: base, rt: ts.Client().Transport}},
+    }
+}
 
 // TestClient_newRequestHeaders verifies that newRequest sets the X-ApiKeys header
 // and Content-Type for JSON bodies.  This ensures API authentication headers
 // conform to Tenable's specification.
 func TestClient_newRequestHeaders(t *testing.T) {
     client := &Client{
-        BaseURL:   "https://example.com",
         AccessKey: "access123",
         SecretKey: "secret456",
         Http:      http.DefaultClient,
@@ -63,12 +85,7 @@ func TestClient_ListUsers(t *testing.T) {
         json.NewEncoder(w).Encode(sample)
     }))
     defer ts.Close()
-    client := &Client{
-        BaseURL:   ts.URL,
-        AccessKey: "access",
-        SecretKey: "secret",
-        Http:      ts.Client(),
-    }
+    client := newTestClient(ts)
     users, err := client.ListUsers()
     if err != nil {
         t.Fatalf("ListUsers error: %v", err)
@@ -116,12 +133,7 @@ func TestClient_GetUser(t *testing.T) {
         json.NewEncoder(w).Encode(sample)
     }))
     defer ts.Close()
-    client := &Client{
-        BaseURL:   ts.URL,
-        AccessKey: "access",
-        SecretKey: "secret",
-        Http:      ts.Client(),
-    }
+    client := newTestClient(ts)
     user, err := client.GetUser(1)
     if err != nil {
         t.Fatalf("GetUser error: %v", err)
@@ -164,12 +176,7 @@ func TestClient_ListRoles(t *testing.T) {
         json.NewEncoder(w).Encode(sample)
     }))
     defer ts.Close()
-    client := &Client{
-        BaseURL:   ts.URL,
-        AccessKey: "access",
-        SecretKey: "secret",
-        Http:      ts.Client(),
-    }
+    client := newTestClient(ts)
     roles, err := client.ListRoles()
     if err != nil {
         t.Fatalf("ListRoles error: %v", err)
@@ -214,12 +221,7 @@ func TestClient_ListGroups(t *testing.T) {
         json.NewEncoder(w).Encode(sample)
     }))
     defer ts.Close()
-    client := &Client{
-        BaseURL:   ts.URL,
-        AccessKey: "access",
-        SecretKey: "secret",
-        Http:      ts.Client(),
-    }
+    client := newTestClient(ts)
     groups, err := client.ListGroups()
     if err != nil {
         t.Fatalf("ListGroups error: %v", err)

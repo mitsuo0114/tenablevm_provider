@@ -17,8 +17,9 @@ import (
 // This implementation is shared between both the legacy Terraform
 // provider and the modern plugin‑framework based provider.  See
 // provider.go for the provider integration.
+const baseURL = "https://cloud.tenable.com"
+
 type Client struct {
-    BaseURL   string
     AccessKey string
     SecretKey string
     Http      *http.Client
@@ -29,7 +30,7 @@ type Client struct {
 // authentication headers are applied.  The caller is responsible for
 // executing the returned request.
 func (c *Client) newRequest(method, path string, body interface{}) (*http.Request, error) {
-    url := strings.TrimRight(c.BaseURL, "/") + "/" + strings.TrimLeft(path, "/")
+    url := strings.TrimRight(baseURL, "/") + "/" + strings.TrimLeft(path, "/")
 
     var buf io.Reader
     if body != nil {
