@@ -78,8 +78,8 @@ func TestClient_ListUsers(t *testing.T) {
     }
     // Compare each user
     for i, u := range users {
-        if u.ID != int(sample[i]["id"].(int)) && u.ID != int(sample[i]["id"].(int)) {
-            // unify type but we can't introspect; we know sample uses int.
+        if u.ID != sample[i]["id"].(int) {
+            t.Errorf("user %d ID mismatch: got %d, want %d", i, u.ID, sample[i]["id"].(int))
         }
         // We'll compare all fields manually using reflect.DeepEqual on a map
         expected := &User{
