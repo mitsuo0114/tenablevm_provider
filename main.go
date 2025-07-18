@@ -5,6 +5,7 @@ import (
     "flag"
     "log"
 
+    "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
@@ -23,10 +24,14 @@ func main() {
     // (e.g. registry.terraform.io/tenable/tenablevm).  For local
     // development any address may be used as long as it matches the
     // CLI configuration.
-    err := providerserver.Serve(context.Background(), NewProvider("dev"), providerserver.ServeOpts{
-        Address: "registry.terraform.io/tenable/tenablevm",
-        Debug:   debug,
-    })
+    err := providerserver.Serve(
+        context.Background(),
+        func() provider.Provider { return NewProvider("dev") },
+        providerserver.ServeOpts{
+            Address: "registry.terraform.io/tenable/tenablevm",
+            Debug:   debug,
+        },
+    )
     if err != nil {
         log.Fatal(err.Error())
     }

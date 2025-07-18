@@ -6,12 +6,12 @@ import (
     "os"
     "time"
 
-    "github.com/hashicorp/terraform-plugin-framework/provider"
-    "github.com/hashicorp/terraform-plugin-framework/resource"
     "github.com/hashicorp/terraform-plugin-framework/datasource"
-    "github.com/hashicorp/terraform-plugin-framework/schema"
-    "github.com/hashicorp/terraform-plugin-framework/types"
     "github.com/hashicorp/terraform-plugin-framework/path"
+    "github.com/hashicorp/terraform-plugin-framework/provider"
+    "github.com/hashicorp/terraform-plugin-framework/provider/schema"
+    "github.com/hashicorp/terraform-plugin-framework/resource"
+    "github.com/hashicorp/terraform-plugin-framework/types"
     // Add structured logging
     "github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -43,7 +43,7 @@ func NewProvider(version string) provider.Provider {
 // becomes the namespace for resources and data sources (e.g.
 // tenablevm_user).  The version is surfaced in provider logs and
 // diagnostics.  See the framework documentation for more details
-//【718857133965766†L690-L731】.
+// 【718857133965766†L690-L731】.
 func (p *tenablevmProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
     resp.TypeName = "tenablevm"
     resp.Version = p.version
