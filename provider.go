@@ -211,8 +211,8 @@ func (p *tenablevmProvider) Resources(_ context.Context) []func() resource.Resou
     }
 }
 
-// DataSources defines the data sources implemented in this provider.  The
-// Tenable VM provider currently does not implement any data sources.
+// DataSources defines the data sources implemented in this provider. The
+// provider exposes user, role, and group data sources for Tenable VM.
 func (p *tenablevmProvider) DataSources(_ context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
         NewUserDataSource,
