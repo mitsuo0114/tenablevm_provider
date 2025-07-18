@@ -91,5 +91,14 @@ Run the Go unit tests with:
 go test ./...
 ```
 
+This repository uses [pre-commit](https://pre-commit.com/) to run formatting, linting and tests before each commit. Install the hooks with:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+The hooks run `go fmt`, `go vet`, `golangci-lint`, `go mod tidy` and the unit tests with coverage enabled. Coverage results are written to `coverage.out` and uploaded in CI as a build artifact.
+
 Note that the repository currently lacks a `go.sum` file. Running the tests may fail if the required modules cannot be downloaded.
 
