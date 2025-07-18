@@ -147,6 +147,8 @@ func TestClient_GetUser(t *testing.T) {
         Permissions: int(sample["permissions"].(int)),
         Enabled:     sample["enabled"].(bool),
     }
+    // Ignore the Raw field when comparing
+    user.Raw = nil
     if !reflect.DeepEqual(user, expected) {
         t.Errorf("GetUser mismatch\n got: %+v\nwant: %+v", user, expected)
     }
@@ -191,6 +193,7 @@ func TestClient_ListRoles(t *testing.T) {
             Name:        sample[i]["name"].(string),
             Description: sample[i]["description"].(string),
         }
+        r.Raw = nil
         if !reflect.DeepEqual(r, expected) {
             t.Errorf("role %d mismatch\n got: %+v\nwant: %+v", i, r, expected)
         }
@@ -236,6 +239,7 @@ func TestClient_ListGroups(t *testing.T) {
             Name:        sample[i]["name"].(string),
             Description: sample[i]["description"].(string),
         }
+        g.Raw = nil
         if !reflect.DeepEqual(g, expected) {
             t.Errorf("group %d mismatch\n got: %+v\nwant: %+v", i, g, expected)
         }
