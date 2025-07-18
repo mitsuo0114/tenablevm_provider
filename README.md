@@ -1,12 +1,14 @@
 # Tenable Vulnerability Management Terraform Provider
 
+[日本語版はこちら](README.ja.md)
+
 This repository contains a Terraform provider that integrates with the **Tenable Vulnerability Management (Tenable VM)** API. The provider is written in Go using the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework).
 
 The provider exposes resources for managing Tenable VM users and data sources for retrieving users, roles and groups. The codebase is intended for local development and experimentation and is not an official Tenable product.
 
 ## Requirements
 
-- Go 1.20 or later
+- Go 1.23 or later
 - Terraform 1.5 or later
 
 ## Building the provider
@@ -27,7 +29,6 @@ The provider requires credentials for the Tenable VM API. These can be supplied 
 |-------------------------|-----------------------------|-----------------------------------------------|
 | `access_key`            | `TENABLE_ACCESS_KEY`        | API access key                                |
 | `secret_key`            | `TENABLE_SECRET_KEY`        | API secret key (sensitive)                    |
-| `base_url`              | N/A                         | Base URL for the API (defaults to `https://cloud.tenable.com`) |
 
 At a minimum `access_key` and `secret_key` must be provided.
 
@@ -48,7 +49,6 @@ terraform {
 provider "tenablevm" {
   access_key = var.access_key
   secret_key = var.secret_key
-  # base_url can be omitted to use the default cloud.tenable.com
 }
 ```
 
@@ -91,5 +91,4 @@ Run the Go unit tests with:
 go test ./...
 ```
 
-Note that the repository currently lacks a `go.sum` file. Running the tests may fail if the required modules cannot be downloaded.
 
