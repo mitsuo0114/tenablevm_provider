@@ -12,7 +12,6 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/schema"
     "github.com/hashicorp/terraform-plugin-framework/types"
     "github.com/hashicorp/terraform-plugin-framework/path"
-    "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
     // Add structured logging
     "github.com/hashicorp/terraform-plugin-log/tflog"
 )
@@ -57,15 +56,13 @@ func (p *tenablevmProvider) Metadata(_ context.Context, _ provider.MetadataReque
 type tenableProviderModel struct {
     AccessKey types.String `tfsdk:"access_key"`
     SecretKey types.String `tfsdk:"secret_key"`
-    BaseURL   types.String `tfsdk:"base_url"`
 }
 
-// Schema defines the provider-level configuration schema.  The
-// provider accepts optional access_key and secret_key attributes
-// (falling back to environment variables) and an optional base_url
-// attribute with a default value【718857133965766†L696-L731】.  Sensitive
-// fields are marked accordingly so they are redacted from logs and
-// state.  Defaults are handled in Configure.
+// Schema defines the provider-level configuration schema. The provider
+// accepts optional access_key and secret_key attributes (falling back to
+// environment variables). Sensitive fields are marked accordingly so
+// they are redacted from logs and state. Defaults are handled in
+// Configure.
 func (p *tenablevmProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
     resp.Schema = schema.Schema{
         Attributes: map[string]schema.Attribute{
@@ -78,13 +75,6 @@ func (p *tenablevmProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                 Optional:    true,
                 Sensitive:   true,
                 Description: "Tenable Vulnerability Management API secret key. Can also be provided via the TENABLE_SECRET_KEY environment variable.",
-            },
-            "base_url": schema.StringAttribute{
-                Optional:    true,
-                Description: "Base URL for Tenable Vulnerability Management API. Defaults to https://cloud.tenable.com.",
-                // Provide a static default via the stringdefault helper.  The
-                // configuration value can still override this default.
-                Default: stringdefault.StaticString("https://cloud.tenable.com"),
             },
         },
         Description: "The Tenable VM provider configures access to the Tenable Vulnerability Management API.",
@@ -122,13 +112,6 @@ func (p *tenablevmProvider) Configure(ctx context.Context, req provider.Configur
             "The provider cannot create the Tenable API client because there is an unknown value for the secret_key. Either set the value directly in the configuration, or use the TENABLE_SECRET_KEY environment variable.",
         )
     }
-    if config.BaseURL.IsUnknown() {
-        resp.Diagnostics.AddAttributeError(
-            path.Root("base_url"),
-            "Unknown Tenable API Base URL",
-            "The provider cannot create the Tenable API client because there is an unknown value for the base_url. Either set the value directly in the configuration or rely on the default https://cloud.tenable.com.",
-        )
-    }
     if resp.Diagnostics.HasError() {
         return
     }
@@ -136,16 +119,12 @@ func (p *tenablevmProvider) Configure(ctx context.Context, req provider.Configur
     // Default values to environment variables, override with config if provided
     accessKey := os.Getenv("TENABLE_ACCESS_KEY")
     secretKey := os.Getenv("TENABLE_SECRET_KEY")
-    baseURL := "https://cloud.tenable.com"
 
     if !config.AccessKey.IsNull() {
         accessKey = config.AccessKey.ValueString()
     }
     if !config.SecretKey.IsNull() {
         secretKey = config.SecretKey.ValueString()
-    }
-    if !config.BaseURL.IsNull() {
-        baseURL = config.BaseURL.ValueString()
     }
 
     // Validate required credentials
@@ -167,10 +146,9 @@ func (p *tenablevmProvider) Configure(ctx context.Context, req provider.Configur
         return
     }
 
-    // Structured logging: set log fields for base URL and credentials (mask secret key).
+    // Structured logging: set log fields for credentials (mask secret key).
     // Use tflog.SetField to store context-specific fields which will be included in
     // subsequent log messages. Mask sensitive information using MaskFieldValuesWithFieldKeys.
-    ctx = tflog.SetField(ctx, "tenable_base_url", baseURL)
     ctx = tflog.SetField(ctx, "tenable_access_key", accessKey)
     ctx = tflog.SetField(ctx, "tenable_secret_key", secretKey)
     ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "tenable_secret_key")
@@ -181,7 +159,6 @@ func (p *tenablevmProvider) Configure(ctx context.Context, req provider.Configur
     // Construct the HTTP client with a reasonable timeout
     httpClient := &http.Client{Timeout: 60 * time.Second}
     apiClient := &Client{
-        BaseURL:   baseURL,
         AccessKey: accessKey,
         SecretKey: secretKey,
         Http:      httpClient,
